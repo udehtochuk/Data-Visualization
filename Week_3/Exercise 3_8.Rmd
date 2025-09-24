@@ -1,0 +1,124 @@
+---
+title: "Data Visualization"
+author: "Udeh Tochukwu"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+> library(ggplot2)
+> library(datasets)
+> library(gapminder)
+```
+
+
+```{r}
+gapminder
+```
+
+# Viz 1: Layer Order in ggplot2
+
+When you put the geom_smooth() function before geom_point() in a ggplot code, the plot is drawn in a way that the smoothing curve (e.g., a fitted line or curve) is plotted first, and then the individual data points are overlaid on top of it.
+This ordering affects the appearance of the plot because the smoothing curve is calculated based on the underlying data points. Therefore, if the smoothing curve is plotted first, it may not accurately reflect the distribution of the data points, especially if there are outliers or if the data is not well-behaved.
+However, this ordering can be useful in certain situations. For example: It can provide a visual representation of the trend in the data before examining individual data points. This can be helpful for understanding the overall pattern in the data. It can make it easier to identify outliers or deviations from the 
+overall trend by visually comparing the data points to the smoothing curve. In summary, while the default ordering of geom_point() before geom_smooth() is generally preferred for most plots, reversing the order can sometimes be useful for specific visualization purposes
+
+```{r}
+p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) +
+      		geom_point() +
+      		geom_smooth()
+print(p)
+
+p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) +
+         geom_smooth() + 
+         geom_point()
+print(p)
+
+```
+
+
+# Viz 2: Life Expectancy vs Population
+
+This code creates a scatter plot where each point represents a country in the Gapminder dataset. The x-axis represents population size, and the y-axis represents life expectancy. Plotting Life Expectancy against population helps visualize how life expectancy varies with the size of the population 
+for different countries. It may reveal trends such as whether countries with larger populations tend to have higher or lower life expectancies. Regarding the unit of observation in the dataset, this plot suggests that each data point represents a country, as we are comparing country-level variables (population and life expectancy). The points converge along the y axis and gradually spreads little. Also, the units are in exponents and may be difficult to read for a person who does not understand the meaning of exponent.
+
+```{r}
+ggplot(gapminder, aes(x = pop, y = lifeExp)) +
+     	geom_point()
+
+```
+
+
+# Viz 3: Scale Mappings
+
+scale_x_sqrt() and scale_y_sqrt() transform the x and y axes using the square root scale, which compresses the 
+larger values and expands the smaller ones. This can be useful for visualizing data with a wide range of values, 
+helping to reveal patterns in both the lower and higher ends of the data. scale_x_reverse() and scale_y_reverse() 
+reverse the direction of the x and y axes, effectively flipping the plot horizontally or vertically. 
+This can be helpful when you want to compare the relationship between variables in the opposite directio
+
+
+
+```{r}
+# Using square root transformation
+ggplot(gapminder, aes(x = pop, y = lifeExp, color = continent)) +
+     geom_point() +
+     scale_x_sqrt() +
+     scale_y_sqrt() +
+     labs(x = "Population (sqrt scale)", y = "Life Expectancy (sqrt scale)") +
+     ggtitle("Life Expectancy vs Population (sqrt scale)")
+
+# Using reverse scale
+ggplot(gapminder, aes(x = pop, y = lifeExp, color = continent)) +
+     geom_point() +
+     scale_x_reverse() +
+     scale_y_reverse() +
+     labs(x = "Population (reversed scale)", y = "Life Expectancy (reversed scale)") +
+     ggtitle("Life Expectancy vs Population (reversed scale)")
+
+```
+
+
+# Viz 4: Color Mappings by Year
+
+The year variable in the Gapminder dataset is an integer representing the year of observation. 
+Each of the data points will have one color that describes the year but reduces in opacity as the year progresses.
+
+```{r}
+ggplot(data = gapminder,
+        mapping = aes(x = pop,
+                      y = lifeExp,
+                      color = year)) + geom_point()
+
+```
+
+# Viz 5: Year as Factor
+In this case, each unique year will be assigned a different color, but they will be treated as discrete categories 
+rather than a continuous scale. This means that each year will have its own distinct color, and there will be no 
+implied order or progression between the colors. This approach may be useful if we want to emphasize the differences between individual years without implying any particular order or progression.
+
+
+```{r}
+ggplot(gapminder, aes(x = pop, y = lifeExp, color = factor(year))) +
+     geom_point() +
+     labs(x = "Population", y = "Life Expectancy") +
+     ggtitle("Life Expectancy vs Population (Color by Year)")
+
+```
+
+# Viz 6: Alternative Plot
+We could create a grid of scatterplots, with each subplot representing a different country. 
+The x-axis could represent GDP Per Capital, the y-axis could represent life expectancy, and each colored 
+point would correspond to a continent and as the size of the points increases, it shows the population sizes 
+of various continents. This will be grid faceted in year. This would enable us to see how the GDP of each the 
+population of each continent and life expectancy change over time.
+
+```{r}
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp, color = continent, size = pop)) +
+     geom_point() +
+     scale_x_log10() +
+     facet_wrap(~ year)
+
+```
+

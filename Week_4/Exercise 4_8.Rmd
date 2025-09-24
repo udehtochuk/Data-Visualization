@@ -1,0 +1,168 @@
+---
+title: "Data Visualization"
+author: "Udeh Tochukwu"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+> library(ggplot2)
+> library(datasets)
+> library(gapminder)
+> library(socviz)
+> data(gss_sm)
+```
+
+
+```{r}
+gapminder
+```
+
+# Viz 1: Recap of Gapminder Vizualization and saving in PDF
+
+The height and width give different sizes when changed to different values.
+
+```{r}
+p = ggplot(gapminder, aes(x = gdpPercap, y = pop)) +
+     geom_point() +
+     facet_wrap(~year, scales = "free") +
+     labs(title = "Population vs Per Capita GDP (Faceted by Year)",
+          x = "Per Capita GDP",
+          y = "Population")
+pdf("population_vs_gdp_faceted_by_year.pdf", width = 12, height = 8)
+print(p)
+dev.off()
+
+p = ggplot(gapminder, aes(x = gdpPercap, y = pop)) +
+     geom_point() +
+     facet_wrap(~country, scales = "free") +
+     labs(title = "Population vs Per Capita GDP (Faceted by Country)",
+          x = "Per Capita GDP",
+          y = "Population")
+
+pdf("population_vs_gdp_faceted_by_country.pdf", width = 12, height = 8)
+print(p)
+dev.off()
+
+```
+
+
+# Viz 2: Investigate between facet_grid(sex ~ race) and facet_grid(~ sex + race).
+
+Both plots will create faceted plots based on the sex and race variables, but there is a difference in the 
+arrangement of the facets: In facet_grid(sex ~ race), the facets are arranged in rows based on the sex variable, 
+and within each row, the facets are arranged based on the race variable. In facet_grid(~ sex + race), 
+the facets are arranged in columns based on the sex variable, and within each column, the facets are arranged 
+based on the race variable. The choice between sex ~ race and ~ sex + race depends on how you want to arrange the 
+facets in your plot. Use sex ~ race if you want the facets to be arranged in rows based on the sex variable, and 
+use ~ sex + race if you want the facets to be arranged in columns based on the sex variable.
+
+```{r}
+p <- ggplot(data = gss_sm,
+             mapping = aes(x = age, y = childs)) +
+     geom_point(alpha = 0.2) +
+     geom_smooth() +
+     facet_grid(sex ~ race) +
+     ggtitle("Facet Grid: sex ~ race")
+print(p)
+
+p <- ggplot(data = gss_sm,
+             mapping = aes(x = age, y = childs)) +
+     geom_point(alpha = 0.2) +
+     geom_smooth() +
+     facet_grid(~ sex + race)
+print(p)
+
+```
+
+
+# Viz 3: Experiment to see what happens when you use facet_wrap()
+
+The facet_wrap() function takes a formula as its argument, specifying how the panels should be arranged.
+facet_wrap(sex ~ race) means that each combination of unique values of sex and race will have its own panel. In other words, the panels will be created based on all possible combinations of sex and race.
+facet_wrap(~ sex + race) means that there will be separate panels for each unique value of sex and each unique value of race. In other words, the panels will be created separately for each level of sex and each level of race
+
+```{r}
+# Using facet_wrap(sex ~ race)
+ggplot(data = gss_sm,
+             mapping = aes(x = age, y = childs)) +
+     geom_point(alpha = 0.2) +
+     geom_smooth() +
+     facet_wrap(sex ~ race)
+
+# Using facet_wrap(~ sex + race)
+ggplot(data = gss_sm,
+             mapping = aes(x = age, y = childs)) +
+     geom_point(alpha = 0.2) +
+     geom_smooth() +
+     facet_wrap(~ sex + race)
+
+```
+
+
+# Viz 4: Frequency Polygon and Histogram
+
+This will create a frequency polygon displaying the distribution of the age variable. 
+Each point on the polygon represents the frequency of observations at a specific value of age, and the 
+lines connect these points to form the polygon.
+
+```{r}
+oh_wi <- c("OH", "WI")
+ggplot(data = subset(midwest, subset = state %in% oh_wi),
+             mapping = aes(x = percollege, fill = state)) +
+             geom_histogram(alpha = 0.4, bins = 20)
+
+ggplot(data = subset(midwest, subset = state %in% oh_wi),
+             mapping = aes(x = percollege, fill = state)) +
+             geom_freqpoly(alpha = 0.4, bins = 20)
+
+```
+
+# Viz 5: Histograms bins2D
+Creates 2D of histogram
+
+```{r}
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) +
+     geom_bin2d(bins = c(10, 30)) +  
+     labs(title = "2D Histogram of Life Expectancy and GDP per capita",
+          x = "GDP per capita",
+          y = "Life Expectancy")
+		  
+# Scaled the x-axis
+p <- ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) +
+     geom_bin2d(bins = c(10, 30)) +  
+     scale_x_log10(labels=scales::dollar) +
+     labs(title = "2D Histogram of Life Expectancy and GDP per capita",
+          x = "GDP per capita",
+          y = "Life Expectancy")
+> p 		  
+		  
+# Scaled both the x and y - axes
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) +
+     geom_bin2d(bins = c(20, 30)) +  
+     labs(title = "Life Expectancy vs. Per Capita GDP") +
+     scale_x_log10(labels=scales::dollar) +  
+     scale_y_continuous(trans = "sqrt")
+
+```
+
+# Viz 6: Density Plot in 2D
+
+```{r}
+ggplot(midwest, 
+          aes(x = percollege, y = percbelowpoverty)) +
+          geom_density_2d() +
+          labs(title = "Density Estimates of Percent Below Poverty Line and Percent College-Educated",
+          x = "Percent College-Educated",
+          y = "Percent Below Poverty Line")
+
+ggplot(midwest, aes(x = percollege, y = percbelowpoverty)) +
+     geom_density_2d() +
+     geom_point() +
+     labs(title = "Density Estimates of Percent Below Poverty Line and Percent College-Educated With Points",
+          x = "Percent College-Educated",
+          y = "Percent Below Poverty Line")
+
+```
+
